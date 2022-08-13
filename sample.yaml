@@ -1,0 +1,144 @@
+# YAML CloudOpss Projects TERRAFORM
+
+project: pxco001
+aws_account: 012345678901
+region: us-east-2
+environment: dev
+s3_state: true
+services: 
+  mynetwork:
+    position: 1
+    service: network
+    active: true
+    cidr: 10.0.0.0/16
+    subnets_public: 2
+    subnets_private: 2
+    vpc_enable_dns_hostnames: true
+    vpc_enable_dns_support: true
+    vpc_assign_generated_ipv6_cidr_block: true
+  eks:
+    position: 2
+    service: eks
+    active: true
+    aws_users: [roan@cloudopss.com.br]
+    worker_nodes:
+      instance_types: [t3.medium]
+    node_scaling_config: 
+      desired_size: 1
+      max_size: 1
+      min_size: 1
+    encryption_config:
+      resources: ["secrets"]
+      provider_kms:
+        deletion_window_in_days: 7
+        enable_key_rotation: true
+  ecr:
+    position: 3
+    service: ecr
+    active: true
+    repositories: 
+      app1:
+        active: true
+        image_tag_mutability: mutable
+        image_scanning:
+          scan_on_push: true
+      app2:
+        active: true
+        image_tag_mutability: mutable
+        image_scanning:
+          scan_on_push: true
+      app3:
+        active: true
+        image_tag_mutability: mutable
+        image_scanning:
+          scan_on_push: true
+  route53:
+    position: 4
+    service: route53
+    active: true
+    domain: meudominio.com.br
+    record:
+      root:
+        active: false
+        type: a
+        ttl: 300
+        records: [200.200.200.200]
+      www:
+        active: false
+        type: a
+        ttl: 300
+        records: [200.200.200.200]
+      home:
+        active: false
+        type: cname
+        ttl: 5
+        weighted_routing_policy:
+          weight: 10
+        set_identifier: www
+        records: [www.meudominio.com.br]
+      traefik:
+        active: true
+        type: alias
+        name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
+        zone_id: A0BCDEFG1HIJK2
+        evaluate_target_health: true
+      argocd:
+        active: true
+        type: alias
+        name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
+        zone_id: A0BCDEFG1HIJK2
+        evaluate_target_health: true
+      app1:
+        active: true
+        type: alias
+        name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
+        zone_id: A0BCDEFG1HIJK2
+        evaluate_target_health: true
+      app2:
+        active: true
+        type: alias
+        name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
+        zone_id: A0BCDEFG1HIJK2
+        evaluate_target_health: true
+      app3:
+        active: true
+        type: alias
+        name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
+        zone_id: A0BCDEFG1HIJK2
+        evaluate_target_health: true
+  ec2:
+    position: 5
+    service: ec2
+    name: teste-ubuntu20.04
+    type: t2.micro
+    ami: ami-02f3416038bdb17fb
+    az: a
+    ssh_port: 7122
+    key_pair:
+      name: ''
+      public_key: ''
+    userdata:
+      script: ''
+      env:
+        VAR1: ''
+        VAR2: ''
+        VAR3: ''
+    security_group:
+      ingress:
+        roan:
+          description: 'ip do roan'
+          ipv4: 201.201.201.201/32
+          ports: [80,443]
+          protocol: tcp
+        fulano:
+          description: 'ip do fulano'
+          ipv4: 100.100.100.100/32
+          ports: [80,443,5000]
+          protocol: tcp
+  rds:
+    position: 6
+    service: rds
+    name: teste-ubuntu20.04
+    type: db.t2.small
+    az: a
+output:
