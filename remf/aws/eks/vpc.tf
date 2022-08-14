@@ -10,8 +10,8 @@ resource "aws_vpc" "project-eks-vpc" {{
   cidr_block = var.cidr_env
 
   tags = tomap({{
-    "Name" = "${{var.project}}-eks-vpc"
-    "kubernetes.io/cluster/${{var.project}}-eks-cluster" = "shared"
+    "Name" = "{project}-eks-vpc"
+    "kubernetes.io/cluster/{project}-eks-cluster" = "shared"
   }})
 }}
 
@@ -24,8 +24,8 @@ resource "aws_subnet" "project-eks-subnet" {{
   vpc_id                  = aws_vpc.project-eks-vpc.id
 
   tags = tomap({{
-    "Name" = "${{var.project}}-eks-subnet"
-    "kubernetes.io/cluster/${{var.project}}-eks-cluster" = "shared"
+    "Name" = "{project}-eks-subnet"
+    "kubernetes.io/cluster/{project}-eks-cluster" = "shared"
   }})
 }}
 
@@ -33,7 +33,7 @@ resource "aws_internet_gateway" "project-eks-gateway" {{
   vpc_id = aws_vpc.project-eks-vpc.id
 
   tags = {{
-    Name = "${{var.project}}-eks-gateway"
+    Name = "{project}-eks-gateway"
   }}
 }}
 

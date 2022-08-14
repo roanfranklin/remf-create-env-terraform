@@ -6,7 +6,7 @@
 #
 
 resource "aws_iam_role" "project-eks-cluster" {{
-  name = "${{var.project}}-eks-cluster"
+  name = "{project}-eks-cluster"
 
   assume_role_policy = <<POLICY
 {{
@@ -35,7 +35,7 @@ resource "aws_iam_role_policy_attachment" "project-eks-vpc-AmazonEKSVPCResourceC
 }}
 
 resource "aws_security_group" "project-eks" {{
-  name        = "${{var.project}}-eks-sg-cluster"
+  name        = "{project}-eks-sg-cluster"
   description = "Cluster communication with worker nodes"
   vpc_id      = aws_vpc.project-eks-vpc.id 
   
@@ -59,8 +59,8 @@ resource "aws_security_group" "project-eks" {{
   }}
 
   tags = {{
-    Name = "${{var.project}}-eks-cluster"
-    Env = "${{var.environment}}"
+    Name = "{project}-eks-cluster"
+    Env = "{env_lower}"
   }}
 }}
 
@@ -73,7 +73,7 @@ resource "aws_security_group" "project-eks" {{
 #}}
 
 resource "aws_eks_cluster" "project-eks-cluster" {{
-  name     = "${{var.project}}-eks-cluster"
+  name     = "{project}-eks-cluster"
   role_arn = aws_iam_role.project-eks-cluster.arn
 
   vpc_config {{

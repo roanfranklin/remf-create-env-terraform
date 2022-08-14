@@ -1,4 +1,4 @@
-# YAML CloudOpss Projects TERRAFORM
+# YAML REMF Projects TERRAFORM
 
 project: pxco001
 aws_account: 012345678901
@@ -6,7 +6,7 @@ region: us-east-2
 environment: dev
 s3_state: true
 services: 
-  network:
+  mynetwork:
     position: 1
     service: network
     active: true
@@ -106,41 +106,54 @@ services:
         name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
         zone_id: A0BCDEFG1HIJK2
         evaluate_target_health: true
-  ec2:
+  rds:
     position: 5
+    service: rds
+    active: true
+    name: teste-ubuntu20.04
+    type: db.t2.small
+    az: a
+  ec2:
+    position: 6
     service: ec2
+    active: true
     name: teste-ubuntu20.04
     type: t2.micro
     ami: ami-02f3416038bdb17fb
     az: a
     ssh_port: 7122
-    public_key: ''
+    key_pair:
+      name: 'id_rsa_devops'
+      public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQLg3dUhBf139I/u2f8h0PlgXOImyHJPUil++XXC8JtfkJEa4y/BSxkxrjbQLqeV5z81JvnLeYHTo5muAgs1IOZ1jgfmfUN2pO367V4F4QCNCUC80xmHor9IcuUgvPvJn8yCJPdcPK/aas6qqkOEo8DzQTWOcLxWrKxj+WmX6cpM4tt013wLkcDVN0FBQHBnRTay/ro0MyaNSno+WQN81yTs7BiYUUF/c0ZvtKeqav93xX0nxUY7vxT+pGSbvjnnJCjvTunc/YRvNhLqnsFmHfN75M/LMjxYgXpZM+vm6x+9QiTdLNJ2d6qabI3VvyTLyrbXNDJcHX1S1THNWM6cqcwym20mtCy1qSKstfLEg4xbceMqFIi6MS0KZ0vFuMFUFuhD5ooCMREaJbUbsVaSOsJIlbaU5Ec0+wwaeta7r9IkA1L77WZiJGKoYD+8EAL+R2hO/9lwSGmVjFV6l7i2XsthHPm7uRzqfRQQkSueAyaMkGi4AL1zcxltBpRFY9vTYe4yaKy8jarCeNY3LrX3LEhBlOESoR3YPVd23hI/vOnW1a6SY57y979/s9AEJEkbt0mFV/I+MPcqj/9fQ4iAC9mG93vXjbpWCuhyiGRIpuwwwQUBYFAofsjII00DaS3bN70vRZZxI8+EB5d1n98m6y0w== wordpress@cloudopss.com.br'
     userdata:
       script: ''
       env:
         VAR1: ''
         VAR2: ''
         VAR3: ''
-    security_group:
-      ingress:
+    security_group_ingress:
+        http:
+          active: true
+          description: 'http'
+          ipv4: 0.0.0.0/0
+          ports: [80]
+          protocol: tcp
+        https:
+          active: true
+          description: 'https'
+          ipv4: 0.0.0.0/0
+          ports: [443]
+          protocol: tcp
         roan:
+          active: true
           description: 'ip do roan'
           ipv4: 201.201.201.201/32
-          ports: [80,443]
+          ports: [500]
+          protocol: tcp
         fulano:
+          active: false
           description: 'ip do fulano'
           ipv4: 100.100.100.100/32
           ports: [80,443,5000]
-      egress:
-        all:
-          description: 'all'
-          ipv4: 0.0.0.0/0
-          ipv6: ::0
-          type: all
-  rds:
-    position: 6
-    service: rds
-    name: teste-ubuntu20.04
-    type: db.t2.small
-    az: a
+          protocol: tcp
 output:

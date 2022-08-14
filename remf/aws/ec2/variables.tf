@@ -2,10 +2,6 @@ variable "region" {{
   description = "Default Region AWS in secret.tfvars"
 }}
 
-variable "environment" {{
-  description = "Environment default in secret.tfvars"
-}}
-
 variable "ami_default" {{
   description = "AMI Default Project in secrets.tfvars"
 }}
@@ -16,10 +12,6 @@ variable "instance_type" {{
 
 variable "ssh_port" {{
   description = "Change Default SSH Port in secret.tfvar"
-}}
-
-variable "key_pair_name" {{
-  default = "KeyPair Name in secret.tfvar"
 }}
 
 variable "public_key" {{

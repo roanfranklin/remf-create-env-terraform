@@ -5,7 +5,7 @@
 #
 
 resource "aws_iam_role" "project-eks-cluster-nodes" {{
-  name = "${{var.project}}-eks-cluster-nodes"
+  name = "{project}-eks-cluster-nodes"
 
   assume_role_policy = <<POLICY
 {{
@@ -40,7 +40,7 @@ resource "aws_iam_role_policy_attachment" "project-eks-cluster-nodes-AmazonEC2Co
 
 resource "aws_eks_node_group" "project-eks-nodes" {{
   cluster_name    = aws_eks_cluster.project-eks-cluster.name
-  node_group_name = "${{var.project}}-eks-nodes"
+  node_group_name = "{project}-eks-nodes"
   node_role_arn   = aws_iam_role.project-eks-cluster-nodes.arn
   subnet_ids      = aws_subnet.project-eks-subnet[*].id
   instance_types  = var.eks_worker_nodes_instance_type

@@ -603,6 +603,7 @@ def create_route53(OUTPUT_RESULTS, NAME, DATA):
 
   # TEMPLATE_ROUTE53 += open('{0}/route53/route53.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   TEMPLATE_OUTPUT =  open('{0}/route53/output.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_OUTPUT += open('{0}/output_end.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   TEMPLATE_PROVIDER = open('{0}/route53/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   TEMPLATE_PROVIDER_S3_STATE = open('{0}/route53/provider_s3state.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   TEMPLATE_VARIABLES =  open('{0}/route53/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)

@@ -6,6 +6,6 @@ resource "aws_vpc" "vpc_env" {{
   assign_generated_ipv6_cidr_block = {vpc_assign_generated_ipv6_cidr_block}
 
   tags = {{
-    Name = "{project}-vpc-${{var.environment}}"
+    Name = "{project}-vpc-{env_lower}"
   }}
 }}

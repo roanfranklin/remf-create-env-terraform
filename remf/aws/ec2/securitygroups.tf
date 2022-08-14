@@ -1,5 +1,5 @@
 resource "aws_security_group" "project_sg" {{
-  name   = "sg_${{var.environment}}_ec2_project"
+  name   = "sg_{env_lower}_ec2_project"
   vpc_id = var.vpc_dev_id
 
   ingress {{
@@ -10,9 +10,7 @@ resource "aws_security_group" "project_sg" {{
     to_port   = var.ssh_port
     protocol  = "tcp"
   }}
-
 {list_ingress}
-
   egress {{
     from_port   = 0
     to_port     = 0

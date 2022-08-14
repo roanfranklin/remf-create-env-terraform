@@ -2,16 +2,6 @@ variable "region" {{
   description = "AWS REGION in ../env.tfvars"
 }}
 
-variable "project" {{
-  description = "Default project"
-  type        = string
-}}
-
-variable "environment" {{
-  description = "Default Environment"
-  type        = string
-}}
-
 variable "cidr_env" {{
   description = "Default CIDR VPC"
   type        = string

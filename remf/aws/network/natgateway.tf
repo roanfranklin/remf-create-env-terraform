@@ -3,6 +3,6 @@ resource "aws_nat_gateway" "nat_gateway_env" {{
   subnet_id     = aws_subnet.subnet_public_az.*.id[0]
 
   tags = {{
-    Name = "{project}-nat-gateway-az1-${{var.environment}}"
+    Name = "{project}-nat-gateway-az1-{env_lower}"
   }}
 }}

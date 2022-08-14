@@ -1,11 +1,11 @@
 # table lock DynamoDB
-resource "aws_dynamodb_table" "project-terraform-locks" {
-  name         = "${var.project}-terraform-locks"
+resource "aws_dynamodb_table" "project-terraform-locks" {{
+  name         = "{project}-terraform-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
-  attribute {
+  attribute {{
     name = "LockID"
     type = "S"
-  }
-}
+  }}
+}}

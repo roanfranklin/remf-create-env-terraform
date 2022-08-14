@@ -1,5 +1,5 @@
 output "aa_kubeconfig" {{
-  value = "aws eks --region ${{var.region}} update-kubeconfig --name ${{var.project}}-eks-cluster"
+  value = "aws eks --region ${{var.region}} update-kubeconfig --name {project}-eks-cluster"
 }}
 
 output "bb_hpa_apply" {{

@@ -7,7 +7,7 @@ resource "aws_route_table" "rt_public_env" {{
   }}
 
   tags = {{
-    Name = "{project}-rt-public-${{var.environment}}"
+    Name = "{project}-rt-public-{env_lower}"
   }}
 }}
 
@@ -29,7 +29,7 @@ resource "aws_route_table" "rt_private_env" {{
   }}
 
   tags = {{
-    Name = "{project}-rt-private-${{var.environment}}"
+    Name = "{project}-rt-private-{env_lower}"
   }}
 }}
 
