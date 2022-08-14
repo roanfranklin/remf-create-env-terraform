@@ -129,6 +129,7 @@ def create_secrets_tfvars(DIR, FILE_YAML):
 
   SERVICES = config.get('services')
   for service in SERVICES:
+
     if str(SERVICES[service].get('service')).upper() == 'NETWORK':
       results['network'] = create_network(results,
                                           service,
@@ -145,8 +146,13 @@ def create_secrets_tfvars(DIR, FILE_YAML):
       results['route53'] = create_route53(results,
                                   service,
                                   SERVICES[service])
+    elif str(SERVICES[service].get('service')).upper() == 'EC2':
+      results['ec2'] = create_ec2(results,
+                                  service,
+                                  SERVICES[service])
   # except:
   #   pass
+  
 
 
 # ###################################################################################################
@@ -156,15 +162,29 @@ def create_secrets_tfvars(DIR, FILE_YAML):
 def create_s3state(DATA):
   POSITION = 0
   SERVICE = 'S3-State'
+  PROJECT = DATA.get('project')
+  AWS_ACCOUNT = DATA.get('aws_aacount')
+  REGION = DATA.get('region')
   ENV = DATA.get('environment')
   DIR = DATA.get('dir_output_start')
   S3_STATE = DATA.get('s3_state')
   DIR_OUTPUT = '{0}/{1}/{2:02}-{3}-{1}'.format(DIR, ENV.upper(), POSITION, SERVICE.upper())
 
-  TEMPLATE_S3STATE = open('{0}/s3-state/s3.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
-  TEMPLATE_DYNAMODB = open('{0}/s3-state/dynamodb.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
-  TEMPLATE_PROVIDER = open('{0}/s3-state/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
-  TEMPLATE_VARIABLES = open('{0}/s3-state/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
+  results = {
+    'project': PROJECT,
+    'aws_account': AWS_ACCOUNT,
+    'region': REGION,
+    'env_upper': ENV.upper(),
+    'env_lower': ENV.lower(),
+    's3_state': S3_STATE,
+    'service_upper': SERVICE.upper(),
+    'service_lower': SERVICE.lower(),
+  }
+
+  TEMPLATE_S3STATE = open('{0}/s3-state/s3.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_DYNAMODB = open('{0}/s3-state/dynamodb.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER = open('{0}/s3-state/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_VARIABLES = open('{0}/s3-state/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
 
   if S3_STATE == True:
     DIR_S3STATE = DIR_OUTPUT
@@ -196,7 +216,10 @@ def create_network(OUTPUT_RESULTS, NAME, DATA):
   SERVICE = DATA.get('service')
   POSITION = DATA.get('position')
   ACTIVE = DATA.get('active')
-  DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
   CIDR = DATA.get('cidr')
   SUBNETS_PUBLIC = DATA.get('subnets_public')
   SUBNETS_PRIVATE = DATA.get('subnets_private')
@@ -322,7 +345,10 @@ def create_eks(OUTPUT_RESULTS, NAME, DATA):
   SERVICE = DATA.get('service')
   POSITION = DATA.get('position')
   ACTIVE = DATA.get('active')
-  DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
   WORKER_NODES = DATA.get('worker_nodes')
   WORKER_NODES_INSTANCE_TYPE = WORKER_NODES.get('instance_types')
   NODE_SCALING_CONFIG = DATA.get('node_scaling_config')
@@ -443,7 +469,10 @@ def create_ecr(OUTPUT_RESULTS, NAME, DATA):
   SERVICE = DATA.get('service')
   POSITION = DATA.get('position')
   ACTIVE = DATA.get('active')
-  DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
   REPOSITORIES = DATA.get('repositories')
   VALUE = []
   TEMPLATE_ECR = ''
@@ -519,7 +548,10 @@ def create_route53(OUTPUT_RESULTS, NAME, DATA):
   SERVICE = DATA.get('service')
   POSITION = DATA.get('position')
   ACTIVE = DATA.get('active')
-  DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
   RECORDS = DATA.get('record')
   DOMAIN = DATA.get('domain')
   VALUE = []
@@ -610,53 +642,135 @@ def create_route53(OUTPUT_RESULTS, NAME, DATA):
   return results
 
 
-def create_ec2(DIR, FILE_YAML):
-  config = yaml.safe_load(open('{0}/{1}'.format(DIR, FILE_YAML)))
+def create_ec2(OUTPUT_RESULTS, NAME, DATA):
+  DIR = OUTPUT_RESULTS.get('dir_output_start')
+  PROJECT = OUTPUT_RESULTS.get('project')
+  AWS_ACCOUNT = OUTPUT_RESULTS.get('aws_account')
+  REGION = OUTPUT_RESULTS.get('region')
+  ENV = OUTPUT_RESULTS.get('environment')
+  S3_STATE = OUTPUT_RESULTS.get('s3_state')
+  SERVICE = DATA.get('service')
+  POSITION = DATA.get('position')
+  ACTIVE = DATA.get('active')
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  RECORDS = DATA.get('record')
+  EC2_NAME = DATA.get('name')
+  EC2_TYPE_INSTANCE = DATA.get('type')
+  EC2_AMI = DATA.get('ami')
+  EC2_AZ = DATA.get('az')
+  for index, az in enumerate(['a','b','c','d','e','f']):
+    if EC2_AZ == az:
+      EC2_AZ = index + 1
+  EC2_SSH_PORT = DATA.get('ssh_port')
+  EC2_KEY_PAIR = DATA.get('key_pair')
+  EC2_KEY_PAIR_NAME = EC2_KEY_PAIR.get('name')
+  EC2_KEY_PAIR_PUBLIC_KEY = EC2_KEY_PAIR.get('public_key')
+  EC2_SG_INGRESS = DATA.get('security_group_ingress')
+  NETWORK = OUTPUT_RESULTS.get('network')
+  SUBNET_PRIVATE_TOTAL = NETWORK.get('subnets_private_total')
+  SUBNET_PUBLIC_TOTAL = NETWORK.get('subnets_public_total')
 
-  PROJECT = config.get('project')
-  AWS_ACCOUNT = config.get('aws_account')  
-  REGION = config.get('region')
-  ENV = config.get('environment')
-  VPC = config.get('vpc')
-  SERVICES = config.get('services')
-  SRV_EC2 = SERVICES.get('ec2')
-  POSITION = 0
-  SERVICE = 'EC2'
-  if not SRV_EC2 is None:
-    POSITION = SRV_EC2.get('position')
-    NAME = SRV_EC2.get('name')
-    TYPE = SRV_EC2.get('type')
-    AMI = SRV_EC2.get('ami')
-    AZ = SRV_EC2.get('az')
-    PUBLIC_KEY = SRV_EC2.get('public_key')
-    # for index, repository in enumerate(REPOSITORIES):
-    #   TEMPLATE_EC2 += open('{0}/ecr/ecr.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(repository.lower())
+  results = {
+    'project': PROJECT,
+    'aws_account': AWS_ACCOUNT,
+    'region': REGION,
+    'env_upper': ENV.upper(),
+    'env_lower': ENV.lower(),
+    's3_state': S3_STATE,
+    'service_upper': SERVICE.upper(),
+    'service_lower': SERVICE.lower(),
+    'position': POSITION,
+    'active': ACTIVE,
+    'ec2_name': EC2_NAME,
+    'type_instance': EC2_TYPE_INSTANCE,
+    'ami': EC2_AMI,
+    'az': EC2_AZ,
+    'ssh_port': EC2_SSH_PORT,
+    'id_rsa_name': EC2_KEY_PAIR_NAME,
+    'id_rsa_public_key': EC2_KEY_PAIR_PUBLIC_KEY
+  }
 
-  TEMPLATE_EC2 = open('{0}/ec2/ec2.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
-  TEMPLATE_KEYS = open('{0}/ec2/keys.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
-  TEMPLATE_PROVIDER = open('{0}/ec2/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(PROJECT, REGION, ENV.lower(), ENV.upper(), SERVICE.upper())
-  TEMPLATE_SG = open('{0}/ec2/securitygroups.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
-  TEMPLATE_VARIABLES =  open('{0}/ec2/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read()
+  OUTPUT_SUBNETS = ''
+  AZ = ['A', 'B', 'C', 'D', 'E', 'F']
+  for index, subnet_private in enumerate(range(SUBNET_PRIVATE_TOTAL)):
+    results_subnet_private = { 'index': index+1, 'az': AZ[subnet_private] }
+    OUTPUT_SUBNETS += open('{0}/ec2/variables_subnet_private.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results_subnet_private)
+  for index, subnet_public in enumerate(range(SUBNET_PUBLIC_TOTAL)):
+    results_subnet_public = { 'index': index+1, 'az': AZ[subnet_public] }
+    OUTPUT_SUBNETS += open('{0}/ec2/variables_subnet_public.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results_subnet_public)
 
-  # Create 04-EC2-DEV
-  DIR_EC2='{0}/{1:02}-{2}-{3}'.format(DIR, POSITION, SERVICE.upper(), ENV.upper())
-  output_service('Serviço {1} no diretório "{0}"'.format(DIR_EC2, SERVICE.upper()))
-  dirExist(DIR_EC2)
+  LIST_INGRESS = ''
+  for sg_ingress in EC2_SG_INGRESS:
+    if EC2_SG_INGRESS[sg_ingress].get('active') == True:
+      for port in EC2_SG_INGRESS[sg_ingress].get('ports'):
+        DESCRIPTION = EC2_SG_INGRESS[sg_ingress].get('description')
+        IPV4 = EC2_SG_INGRESS[sg_ingress].get('ipv4')
+        PROTOCOL = EC2_SG_INGRESS[sg_ingress].get('protocol')
+        XX = {
+          'description': DESCRIPTION,
+          'ipv4': IPV4,
+          'port': port,
+          'protocol': PROTOCOL
+        }
+        LIST_INGRESS += open('{0}/ec2/securitygroups_ingress.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**XX)
 
-  FILE_EC2='{0}/ec2.tf'.format(DIR_EC2)
-  writefile(FILE_EC2, TEMPLATE_EC2)
+  results['list_ingress'] = LIST_INGRESS
 
-  FILE_KEYS='{0}/keys.tf'.format(DIR_EC2)
-  writefile(FILE_KEYS, TEMPLATE_KEYS)
+  TEMPLATE_EC2 = open('{0}/ec2/ec2.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_KEYS = open('{0}/ec2/keys.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER = open('{0}/ec2/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER_S3_STATE = open('{0}/ec2/provider_s3state.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_SG = open('{0}/ec2/securitygroups.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_VARIABLES = open('{0}/ec2/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_VARIABLES += OUTPUT_SUBNETS
+  TEMPLATE_EC2_SCRIPT_BOOTSTRAP_SH = open('{0}/ec2/script/bootstrap.sh'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
 
-  FILE_PROVIDER='{0}/provider.tf'.format(DIR_EC2)
-  writefile(FILE_PROVIDER, TEMPLATE_PROVIDER)
+  if results.get('active') == True:
+    DIR_EC2 = DIR_OUTPUT
+    output_service('Serviço {1} no diretório "{0}"'.format(DIR_EC2, SERVICE.upper()))
+    dirExist(DIR_EC2)
 
-  FILE_SG='{0}/securitygroups.tf'.format(DIR_EC2)
-  writefile(FILE_SG, TEMPLATE_SG)
+    FILE_EC2='{0}/ec2.tf'.format(DIR_EC2)
+    writefile('w', FILE_EC2, TEMPLATE_EC2)
 
-  FILE_VARIABLES='{0}/variables.tf'.format(DIR_EC2)
-  writefile(FILE_VARIABLES, TEMPLATE_VARIABLES)
+    FILE_KEYS='{0}/keys.tf'.format(DIR_EC2)
+    writefile('w', FILE_KEYS, TEMPLATE_KEYS)
+
+    if results.get('s3_state') == True:
+      FILE_PROVIDER_S3_STATE='{0}/provider.tf'.format(DIR_EC2)
+      writefile('w', FILE_PROVIDER_S3_STATE, TEMPLATE_PROVIDER_S3_STATE)
+      
+      FILE_PROVIDER='{0}/provider.tf'.format(DIR_EC2)
+      writefile('a', FILE_PROVIDER, TEMPLATE_PROVIDER)
+    else:
+      FILE_PROVIDER='{0}/provider.tf'.format(DIR_EC2)
+      writefile('w', FILE_PROVIDER, TEMPLATE_PROVIDER)
+
+    FILE_SG='{0}/securitygroups.tf'.format(DIR_EC2)
+    writefile('w', FILE_SG, TEMPLATE_SG)
+
+    FILE_VARIABLES='{0}/variables.tf'.format(DIR_EC2)
+    writefile('w', FILE_VARIABLES, TEMPLATE_VARIABLES)
+
+    # Create 04-EC2-DEV/script
+    DIR_EC2_SCRIPT='{0}/script'.format(DIR_EC2)
+    dirExist(DIR_EC2_SCRIPT)
+
+    FILE_EC2_SCRIPT_BOOTSTRAP_SH='{0}/bootstrap.sh'.format(DIR_EC2_SCRIPT)
+    writefile('w', FILE_EC2_SCRIPT_BOOTSTRAP_SH, TEMPLATE_EC2_SCRIPT_BOOTSTRAP_SH)
+
+    TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_ec2.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+
+    FILE_SECRETS_TFVARS='{0}/{1}/secrets.tfvars'.format(DIR, ENV.upper())
+    output_service('Arquivo de Segredos "{0}"'.format(FILE_SECRETS_TFVARS))
+    writefile('a', FILE_SECRETS_TFVARS, TEMPLATE_SECRETS_TFVARS)
+  else:
+    pass
+
+  return results
 
 
 def create_rds(DIR, FILE_YAML):
