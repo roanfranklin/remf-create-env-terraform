@@ -150,6 +150,26 @@ def create_secrets_tfvars(DIR, FILE_YAML):
       results['ec2'] = create_ec2(results,
                                   service,
                                   SERVICES[service])
+    # elif str(SERVICES[service].get('service')).upper() == 'RDS':
+    #   results['rds'] = create_rds(results,
+    #                               service,
+    #                               SERVICES[service])
+    # elif str(SERVICES[service].get('service')).upper() == 'RDS_AURORA':
+    #   results['rds_aurora'] = create_rds_aurora(results,
+    #                               service,
+    #                               SERVICES[service])
+    # elif str(SERVICES[service].get('service')).upper() == 'S3_WEB':
+    #   results['s3_web'] = create_s3_web(results,
+    #                               service,
+    #                               SERVICES[service])
+    # elif str(SERVICES[service].get('service')).upper() == 'S3_PUBLIC':
+    #   results['s3_public'] = create_s3_public(results,
+    #                               service,
+    #                               SERVICES[service])
+    # elif str(SERVICES[service].get('service')).upper() == 'S3_PRIVATE':
+    #   results['s3_private'] = create_s3_private(results,
+    #                               service,
+    #                               SERVICES[service])
   # except:
   #   pass
   
