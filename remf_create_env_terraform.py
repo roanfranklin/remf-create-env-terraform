@@ -693,6 +693,8 @@ def create_ec2(OUTPUT_RESULTS, NAME, DATA):
   NETWORK = OUTPUT_RESULTS.get('network')
   SUBNET_PRIVATE_TOTAL = NETWORK.get('subnets_private_total')
   SUBNET_PUBLIC_TOTAL = NETWORK.get('subnets_public_total')
+  EC2_USERDATA = DATA.get('userdata')
+  EC2_USERDATA_SCRIPT = EC2_USERDATA.get('script')
 
   results = {
     'project': PROJECT,
@@ -711,8 +713,21 @@ def create_ec2(OUTPUT_RESULTS, NAME, DATA):
     'az': EC2_AZ,
     'ssh_port': EC2_SSH_PORT,
     'id_rsa_name': EC2_KEY_PAIR_NAME,
-    'id_rsa_public_key': EC2_KEY_PAIR_PUBLIC_KEY
+    'id_rsa_public_key': EC2_KEY_PAIR_PUBLIC_KEY,
+    'userdata_script': EC2_USERDATA_SCRIPT
   }
+
+  ENV_USERDATA = ''
+  TOTAL_ENV = len(EC2_USERDATA.get('env')) - 1
+  for index, script_userdata_env in enumerate(EC2_USERDATA.get('env')):
+    values = { 'var_key': script_userdata_env, 'var_value': EC2_USERDATA['env'][script_userdata_env].get('value') }
+    ENV_USERDATA += '    {var_key} = "{var_value}"'.format(**values)
+    if index < TOTAL_ENV:
+      ENV_USERDATA += ',\n'
+    # else:
+    #   ENV_USERDATA += '\n'
+
+  results['userdata_script_env'] = ENV_USERDATA
 
   OUTPUT_SUBNETS = ''
   AZ = ['A', 'B', 'C', 'D', 'E', 'F']

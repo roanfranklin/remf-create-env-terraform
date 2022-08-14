@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# ${{VAR_ENV}}
 # ${{VAR_PORT_SSH}}
 # ${{VAR_DIR_REMF}}
 
@@ -21,7 +20,6 @@ if [ ! -d "${{VAR_DIR_REMF}}" ]; then
 fi
 
 echo '# VARIABLES
-# Env: ${{VAR_ENV}}
 # Port SSH: ${{VAR_PORT_SSH}}
 # Dir: ${{VAR_DIR_REMF}}
 #
