@@ -120,7 +120,7 @@ def create_secrets_tfvars(DIR, FILE_YAML):
     'dir_output_start': DIR
   }
 
-  TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_env.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_start.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
 
   FILE_SECRETS_TFVARS='{0}/{1}/secrets.tfvars'.format(DIR, ENV.upper())
   writefile('w', FILE_SECRETS_TFVARS, TEMPLATE_SECRETS_TFVARS)
