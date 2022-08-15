@@ -106,13 +106,32 @@ services:
         name: abcd123a456bc7def8a901a2b34c5d6e-1234567890.us-east-2.elb.amazonaws.com
         zone_id: A0BCDEFG1HIJK2
         evaluate_target_health: true
-  rds:
+  mysql:
     position: 5
-    service: rds
     active: true
-    name: teste-ubuntu20.04
-    type: db.t2.small
-    az: a
+    service: rds
+    identifier: rds-dev-mysql
+    instance_class: db.t3.medium
+    allocated_storage: 40
+    max_allocated_storage: 100
+    engine: mysql
+    engine_version: 5.7
+    parameter_group_name: default.mysql5.7
+    availability_zone: b
+    database: ''
+    username: ''
+    password: ''
+    skip_final_snapshot: true
+    final_snapshot_identifier: rds-dev-mysql-001
+    backup_retention_period: 0
+    publicly_accessible: false
+    security_group_ingress:
+      ingress1:
+        active: true
+        description: 'ip do roan'
+        ipv4: 200.200.200.200./32
+        ports: [3306]
+        protocol: tcp
   ec2:
     position: 6
     service: ec2

@@ -1,6 +1,6 @@
 resource "aws_security_group" "project_sg" {{
   name   = "sg_{env_lower}_ec2_project"
-  vpc_id = var.vpc_dev_id
+  vpc_id = var.vpc_env_id
 
   ingress {{
     cidr_blocks = [
