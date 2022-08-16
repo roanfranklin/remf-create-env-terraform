@@ -26,15 +26,19 @@ variable "rds_parameter_group_name" {{
   description = "RDS Parameter Group Name in secrets.tfvars"
 }}
 
-variable "rds_database_mysql" {{
+variable "rds_database_{engine}" {{
   description = "Database MySQL in secrets.tfvars"
 }}
 
-variable "rds_username_mysql" {{
+variable "rds_username_{engine}" {{
   description = "Username database MySQL in secrets.tfvars"
 }}
 
-variable "rds_password_mysql" {{
+variable "rds_publicly_accessible" {{
+  description = "Publicly Accessible in secrets.tfvars"
+}}
+
+variable "rds_password_{engine}" {{
   description = "Password database MySQL in secrets.tfvars"
   type        = string
   sensitive   = true
