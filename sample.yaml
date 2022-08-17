@@ -21,6 +21,9 @@ services:
     service: eks
     active: true
     aws_users: [roan@cloudopss.com.br]
+    vpc:
+      cidr: 10.1.0.0/16
+      subnets_public: 2
     worker_nodes:
       instance_types: [t3.medium]
     node_scaling_config: 
@@ -177,4 +180,16 @@ services:
           ipv4: 100.100.100.100/32
           ports: [80,443,5000]
           protocol: tcp
+  website:
+    position: 7
+    service: s3
+    active: true
+    bucket_name: website
+    force_destroy: false
+    bucket_backup: true
+    acl: public-read
+    website_configuration:
+      website: true
+      index_document: "index.html"
+      error_document: "404.html"
 output:

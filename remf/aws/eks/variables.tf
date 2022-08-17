@@ -25,7 +25,7 @@ variable "subnets_private_total" {{
 
 variable "eks_worker_nodes_instance_type" {{
   description = "Default Worker Node Instance Type"
-  type        = string
+  #type        = string
 }}
 
 variable "eks_node_scaling_desired_size" {{
@@ -45,12 +45,12 @@ variable "eks_node_scaling_min_size" {{
 
 variable "eks_encryption_config_resources" {{
   description = "Default Encryption Config Resources"
-  type        = string
+  #type        = string
 }}
 
 variable "eks_encryption_config_deletion_window_in_days" {{
   description = "Default Encryption Config Deletion Window in Days"
-  type        = string
+  #type        = string
 }}
 
 variable "eks_encryption_config_enable_key_rotation" {{

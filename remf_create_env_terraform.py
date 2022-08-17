@@ -128,48 +128,48 @@ def create_secrets_tfvars(DIR, FILE_YAML):
   create_s3state(results)
 
   SERVICES = config.get('services')
-  for service in SERVICES:
-
-    if str(SERVICES[service].get('service')).upper() == 'NETWORK':
-      results['network'] = create_network(results,
-                                          service,
-                                          SERVICES[service])
-    elif str(SERVICES[service].get('service')).upper() == 'EKS':
-      results['eks'] = create_eks(results,
-                                  service,
-                                  SERVICES[service])
-    elif str(SERVICES[service].get('service')).upper() == 'ECR':
-      results['ecr'] = create_ecr(results,
-                                  service,
-                                  SERVICES[service])
-    elif str(SERVICES[service].get('service')).upper() == 'ROUTE53':
-      results['route53'] = create_route53(results,
-                                  service,
-                                  SERVICES[service])
-    elif str(SERVICES[service].get('service')).upper() == 'EC2':
-      results['ec2'] = create_ec2(results,
-                                  service,
-                                  SERVICES[service])
-    elif str(SERVICES[service].get('service')).upper() == 'RDS':
-      results['rds'] = create_rds(results,
-                                  service,
-                                  SERVICES[service])
-    # elif str(SERVICES[service].get('service')).upper() == 'RDS_AURORA':
-    #   results['rds_aurora'] = create_rds_aurora(results,
-    #                               service,
-    #                               SERVICES[service])
-    # elif str(SERVICES[service].get('service')).upper() == 'S3_WEB':
-    #   results['s3_web'] = create_s3_web(results,
-    #                               service,
-    #                               SERVICES[service])
-    # elif str(SERVICES[service].get('service')).upper() == 'S3_PUBLIC':
-    #   results['s3_public'] = create_s3_public(results,
-    #                               service,
-    #                               SERVICES[service])
-    # elif str(SERVICES[service].get('service')).upper() == 'S3_PRIVATE':
-    #   results['s3_private'] = create_s3_private(results,
-    #                               service,
-    #                               SERVICES[service])
+  if len(SERVICES) > 0:
+    for service in SERVICES:
+      if str(SERVICES[service].get('service')).upper() == 'NETWORK':
+        results['network'] = create_network(results,
+                                            service,
+                                            SERVICES[service])
+      elif str(SERVICES[service].get('service')).upper() == 'EKS':
+        results['eks'] = create_eks(results,
+                                    service,
+                                    SERVICES[service])
+      elif str(SERVICES[service].get('service')).upper() == 'ECR':
+        results['ecr'] = create_ecr(results,
+                                    service,
+                                    SERVICES[service])
+      elif str(SERVICES[service].get('service')).upper() == 'ROUTE53':
+        results['route53'] = create_route53(results,
+                                    service,
+                                    SERVICES[service])
+      elif str(SERVICES[service].get('service')).upper() == 'EC2':
+        results['ec2'] = create_ec2(results,
+                                    service,
+                                    SERVICES[service])
+      elif str(SERVICES[service].get('service')).upper() == 'RDS':
+        results['rds'] = create_rds(results,
+                                    service,
+                                    SERVICES[service])
+      # elif str(SERVICES[service].get('service')).upper() == 'RDS_AURORA':
+      #   results['rds_aurora'] = create_rds_aurora(results,
+      #                               service,
+      #                               SERVICES[service])
+      elif str(SERVICES[service].get('service')).upper() == 'S3':
+        results['s3'] = create_s3(results,
+                                    service,
+                                    SERVICES[service])
+      # elif str(SERVICES[service].get('service')).upper() == 'S3_PUBLIC':
+      #   results['s3_public'] = create_s3_public(results,
+      #                               service,
+      #                               SERVICES[service])
+      # elif str(SERVICES[service].get('service')).upper() == 'S3_PRIVATE':
+      #   results['s3_private'] = create_s3_private(results,
+      #                               service,
+      #                               SERVICES[service])
   # except:
   #   pass
   
@@ -957,6 +957,257 @@ def create_rds(OUTPUT_RESULTS, NAME, DATA):
 
 
     TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_rds.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+
+    FILE_SECRETS_TFVARS='{0}/{1}/secrets.tfvars'.format(DIR, ENV.upper())
+    output_service('Arquivo de Segredos "{0}"'.format(FILE_SECRETS_TFVARS))
+    writefile('a', FILE_SECRETS_TFVARS, TEMPLATE_SECRETS_TFVARS)
+  else:
+    pass
+
+  return results
+
+
+def create_rds_aurora(OUTPUT_RESULTS, NAME, DATA):
+  DIR = OUTPUT_RESULTS.get('dir_output_start')
+  PROJECT = OUTPUT_RESULTS.get('project')
+  AWS_ACCOUNT = OUTPUT_RESULTS.get('aws_account')
+  REGION = OUTPUT_RESULTS.get('region')
+  ENV = OUTPUT_RESULTS.get('environment')
+  S3_STATE = OUTPUT_RESULTS.get('s3_state')
+  SERVICE = DATA.get('service')
+  POSITION = DATA.get('position')
+  ACTIVE = DATA.get('active')
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  RDS_IDENTIFIE = DATA.get('identifier')
+  RDS_TYPE_INSTANCE = DATA.get('instance_class')
+  RDS_AZ = DATA.get('az')
+  for index, az in enumerate(['a','b','c','d','e','f']):
+    if RDS_AZ == az:
+      RDS_AZ_NUM = index + 1
+  RDS_ALLOCATED_STORAGE = DATA.get('allocated_storage')
+  RDS_MAX_ALLOCATED_STORAGE = DATA.get('max_allocated_storage')
+  RDS_ENGINE = DATA.get('engine')
+  RDS_ENGINE_VERSION = DATA.get('engine_version')
+  RDS_PORT = DATA.get('rds_port')
+  RDS_PARAMETER_GROUP_NAME = DATA.get('parameter_group_name')
+  RDS_DATABASE = DATA.get('database')
+  RDS_USERNAME = DATA.get('username')
+  RDS_PASSWORD = DATA.get('password')
+  RDS_SKIP_FINAL_SNAPSHOT = DATA.get('skip_final_snapshot')
+  RDS_FINAL_SNAPSHOT_IDENTIFIER = DATA.get('final_snapshot_identifier')
+  RDS_BACKUP_RETENTION_PERIOD = DATA.get('backup_retention_period')
+  RDS_PUBLICLY_ACCESSIBLE = DATA.get('publicly_accessible')
+  RDS_SG_INGRESS = DATA.get('security_group_ingress')
+  NETWORK = OUTPUT_RESULTS.get('network')
+  SUBNET_PRIVATE_TOTAL = NETWORK.get('subnets_private_total')
+  SUBNET_PUBLIC_TOTAL = NETWORK.get('subnets_public_total')
+
+  results = {
+    'project': PROJECT,
+    'aws_account': AWS_ACCOUNT,
+    'region': REGION,
+    'env_upper': ENV.upper(),
+    'env_lower': ENV.lower(),
+    's3_state': S3_STATE,
+    'service_upper': SERVICE.upper(),
+    'service_lower': SERVICE.lower(),
+    'position': POSITION,
+    'active': ACTIVE,
+    'rds_name': RDS_IDENTIFIE,
+    'rds_instance_class': RDS_TYPE_INSTANCE,
+    'az': str(RDS_AZ).lower(),
+    'allocated_storage': RDS_ALLOCATED_STORAGE,
+    'max_allocated_storage': RDS_MAX_ALLOCATED_STORAGE,
+    'rds_port': RDS_PORT,
+    'engine': RDS_ENGINE,
+    'engine_version': RDS_ENGINE_VERSION,
+    'parameter_group_name': RDS_PARAMETER_GROUP_NAME,
+    'az_number': RDS_AZ_NUM,
+    'rds_database': RDS_DATABASE,
+    'rds_username': RDS_USERNAME,
+    'rds_password': RDS_PASSWORD,
+    'skip_final_snapshot': str(RDS_SKIP_FINAL_SNAPSHOT).lower(),
+    'final_snapshot_identifier': RDS_FINAL_SNAPSHOT_IDENTIFIER,
+    'backup_retention_period': RDS_BACKUP_RETENTION_PERIOD,
+    'rds_publicly_accessible': str(RDS_PUBLICLY_ACCESSIBLE).lower()
+  }
+
+  OUTPUT_SUBNETS = ''
+  AZ = ['A', 'B', 'C', 'D', 'E', 'F']
+  for index, subnet_private in enumerate(range(SUBNET_PRIVATE_TOTAL)):
+    results_subnet_private = { 'index': index+1, 'az': AZ[subnet_private] }
+    OUTPUT_SUBNETS += open('{0}/rds/variables_subnet_private.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results_subnet_private)
+  for index, subnet_public in enumerate(range(SUBNET_PUBLIC_TOTAL)):
+    results_subnet_public = { 'index': index+1, 'az': AZ[subnet_public] }
+    OUTPUT_SUBNETS += open('{0}/rds/variables_subnet_public.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results_subnet_public)
+
+  LIST_INGRESS = ''
+  for sg_ingress in RDS_SG_INGRESS:
+    if RDS_SG_INGRESS[sg_ingress].get('active') == True:
+      for port in RDS_SG_INGRESS[sg_ingress].get('ports'):
+        DESCRIPTION = RDS_SG_INGRESS[sg_ingress].get('description')
+        IPV4 = RDS_SG_INGRESS[sg_ingress].get('ipv4')
+        PROTOCOL = RDS_SG_INGRESS[sg_ingress].get('protocol')
+        XX = {
+          'description': DESCRIPTION,
+          'ipv4': IPV4,
+          'port': port,
+          'protocol': PROTOCOL
+        }
+        LIST_INGRESS += open('{0}/rds/securitygroups_ingress.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**XX)
+
+  results['list_ingress'] = LIST_INGRESS
+
+  LIST_AZ_TO_DB_SUBNET_GROUP = ''
+  for index, subnet_private in enumerate(range(SUBNET_PRIVATE_TOTAL)):
+    subnet_private_num = subnet_private + 1
+    LIST_AZ_TO_DB_SUBNET_GROUP += '    var.subnet_private_az{0}_id'.format(subnet_private_num)
+    if (index + 1) < SUBNET_PRIVATE_TOTAL:
+      LIST_AZ_TO_DB_SUBNET_GROUP += ',\n'
+
+  if RDS_PUBLICLY_ACCESSIBLE == True:
+    for index, subnet_public in enumerate(range(SUBNET_PUBLIC_TOTAL)):
+      subnet_public_num = subnet_public + 1
+      if (index + 1) < SUBNET_PUBLIC_TOTAL:
+        LIST_AZ_TO_DB_SUBNET_GROUP += ',\n'
+      LIST_AZ_TO_DB_SUBNET_GROUP += '    var.subnet_public_az{0}_id'.format(subnet_public_num)
+      if (index + 1) < SUBNET_PUBLIC_TOTAL:
+        LIST_AZ_TO_DB_SUBNET_GROUP += ',\n'      
+
+  results['list_az_db_subnet_group'] = LIST_AZ_TO_DB_SUBNET_GROUP
+
+  TEMPLATE_RDS = open('{0}/rds/rds.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_DB_SUBNET_GROUP = open('{0}/rds/db_subnet_group.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER = open('{0}/rds/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER_S3_STATE = open('{0}/rds/provider_s3state.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_SG = open('{0}/rds/securitygroups.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_VARIABLES = open('{0}/rds/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_VARIABLES += OUTPUT_SUBNETS
+
+  if results.get('active') == True:
+    DIR_RDS = DIR_OUTPUT
+    output_service('Serviço {1} no diretório "{0}"'.format(DIR_RDS, SERVICE.upper()))
+    dirExist(DIR_RDS)
+
+    FILE_RDS='{0}/rds.tf'.format(DIR_RDS)
+    writefile('w', FILE_RDS, TEMPLATE_RDS)
+
+    FILE_DB_SUBNET_GROUP='{0}/db_subnet_group.tf'.format(DIR_RDS)
+    writefile('w', FILE_DB_SUBNET_GROUP, TEMPLATE_DB_SUBNET_GROUP)
+
+    if results.get('s3_state') == True:
+      FILE_PROVIDER_S3_STATE='{0}/provider.tf'.format(DIR_RDS)
+      writefile('w', FILE_PROVIDER_S3_STATE, TEMPLATE_PROVIDER_S3_STATE)
+      
+      FILE_PROVIDER='{0}/provider.tf'.format(DIR_RDS)
+      writefile('a', FILE_PROVIDER, TEMPLATE_PROVIDER)
+    else:
+      FILE_PROVIDER='{0}/provider.tf'.format(DIR_RDS)
+      writefile('w', FILE_PROVIDER, TEMPLATE_PROVIDER)
+
+    FILE_SG='{0}/securitygroups.tf'.format(DIR_RDS)
+    writefile('w', FILE_SG, TEMPLATE_SG)
+
+    FILE_VARIABLES='{0}/variables.tf'.format(DIR_RDS)
+    writefile('w', FILE_VARIABLES, TEMPLATE_VARIABLES)
+
+
+    TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_rds.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+
+    FILE_SECRETS_TFVARS='{0}/{1}/secrets.tfvars'.format(DIR, ENV.upper())
+    output_service('Arquivo de Segredos "{0}"'.format(FILE_SECRETS_TFVARS))
+    writefile('a', FILE_SECRETS_TFVARS, TEMPLATE_SECRETS_TFVARS)
+  else:
+    pass
+
+  return results
+
+
+def create_s3(OUTPUT_RESULTS, NAME, DATA):
+  DIR = OUTPUT_RESULTS.get('dir_output_start')
+  PROJECT = OUTPUT_RESULTS.get('project')
+  AWS_ACCOUNT = OUTPUT_RESULTS.get('aws_account')
+  REGION = OUTPUT_RESULTS.get('region')
+  ENV = OUTPUT_RESULTS.get('environment')
+  S3_STATE = OUTPUT_RESULTS.get('s3_state')
+  SERVICE = DATA.get('service')
+  POSITION = DATA.get('position')
+  ACTIVE = DATA.get('active')
+  if SERVICE.upper() == NAME.upper():
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
+  else:
+    DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  BUCKET_S3_NAME = DATA.get('bucket_name')
+  BUCKET_S3_FORCE_DESTROY = DATA.get('force_destroy')
+  BUCKET_S3_BACKUP = DATA.get('bucket_backup')
+  BUCKET_S3_ACL = DATA.get('acl')
+  BUCKET_S3_WEBSITE_CONFIGURATION = DATA.get('website_configuration')
+  BUCKET_S3_WEBSITE = BUCKET_S3_WEBSITE_CONFIGURATION.get('website')
+  BUCKET_S3_WEBSITE_INDEX = BUCKET_S3_WEBSITE_CONFIGURATION.get('index_document')
+  BUCKET_S3_WEBSITE_ERROR = BUCKET_S3_WEBSITE_CONFIGURATION.get('error_document')
+  
+  results = {
+    'project': PROJECT,
+    'aws_account': AWS_ACCOUNT,
+    'region': REGION,
+    'env_upper': ENV.upper(),
+    'env_lower': ENV.lower(),
+    's3_state': S3_STATE,
+    'service_upper': SERVICE.upper(),
+    'service_lower': SERVICE.lower(),
+    'position': POSITION,
+    'active': ACTIVE,
+    'name_s3_upper': NAME.upper(),
+    'name_s3_lower': NAME.lower(),
+    'bucket_name': BUCKET_S3_NAME,
+    'bucket_website_name': BUCKET_S3_NAME,
+    'force_destroy': str(BUCKET_S3_FORCE_DESTROY).lower(),
+    'bucket_backup': BUCKET_S3_BACKUP,
+    'acl': BUCKET_S3_ACL,
+    'website': BUCKET_S3_WEBSITE,
+    'index_document': BUCKET_S3_WEBSITE_INDEX,
+    'error_document': BUCKET_S3_WEBSITE_ERROR
+  }
+
+  TEMPLATE_S3 = open('{0}/s3-website/s3.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  if BUCKET_S3_WEBSITE == True:
+    TEMPLATE_S3 += open('{0}/s3-website/s3-bkp.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_OUTPUT = open('{0}/s3-website/output.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  if BUCKET_S3_WEBSITE == True:
+    TEMPLATE_OUTPUT += open('{0}/s3-website/output-bkp.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER = open('{0}/s3-website/provider.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_PROVIDER_S3_STATE = open('{0}/s3-website/provider_s3state.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  TEMPLATE_VARIABLES = open('{0}/s3-website/variables.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+
+  if results.get('active') == True:
+    DIR_S3 = DIR_OUTPUT
+    output_service('Serviço {1} no diretório "{0}"'.format(DIR_S3, SERVICE.upper()))
+    dirExist(DIR_S3)
+
+    FILE_S3='{0}/rds.tf'.format(DIR_S3)
+    writefile('w', FILE_S3, TEMPLATE_S3)
+
+    FILE_OUTPUT='{0}/output.tf'.format(DIR_S3)
+    writefile('w', FILE_OUTPUT, TEMPLATE_OUTPUT)
+
+    if results.get('s3_state') == True:
+      FILE_PROVIDER_S3_STATE='{0}/provider.tf'.format(DIR_S3)
+      writefile('w', FILE_PROVIDER_S3_STATE, TEMPLATE_PROVIDER_S3_STATE)
+      
+      FILE_PROVIDER='{0}/provider.tf'.format(DIR_S3)
+      writefile('a', FILE_PROVIDER, TEMPLATE_PROVIDER)
+    else:
+      FILE_PROVIDER='{0}/provider.tf'.format(DIR_S3)
+      writefile('w', FILE_PROVIDER, TEMPLATE_PROVIDER)
+
+    FILE_VARIABLES='{0}/variables.tf'.format(DIR_S3)
+    writefile('w', FILE_VARIABLES, TEMPLATE_VARIABLES)
+
+
+    TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_s3website.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
 
     FILE_SECRETS_TFVARS='{0}/{1}/secrets.tfvars'.format(DIR, ENV.upper())
     output_service('Arquivo de Segredos "{0}"'.format(FILE_SECRETS_TFVARS))
