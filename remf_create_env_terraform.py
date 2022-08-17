@@ -369,6 +369,9 @@ def create_eks(OUTPUT_RESULTS, NAME, DATA):
     DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
   else:
     DIR_OUTPUT = '{0}/{1:02}-{2}-{3}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper(), NAME.upper())
+  EKS_VPC = DATA.get('vpc')
+  EKS_VPC_CIDR = EKS_VPC.get('cidr')
+  EKS_VPC_SUBNET_PUBLIC = EKS_VPC.get('subnets_public')
   WORKER_NODES = DATA.get('worker_nodes')
   WORKER_NODES_INSTANCE_TYPE = WORKER_NODES.get('instance_types')
   NODE_SCALING_CONFIG = DATA.get('node_scaling_config')
@@ -402,6 +405,8 @@ def create_eks(OUTPUT_RESULTS, NAME, DATA):
     'service_lower': SERVICE.lower(),
     'position': POSITION,
     'active': ACTIVE,
+    'eks_vpc_cidr': EKS_VPC_CIDR,
+    'eks_vpc_subnets_public': EKS_VPC_SUBNET_PUBLIC,
     'worker_nodes_instance_type': str(WORKER_NODES_INSTANCE_TYPE).replace('\'','"'),
     'node_scaling_desired_size': NODE_SCALING_CONFIG_DESIRED_SIZE,
     'node_scaling_max_size': NODE_SCALING_CONFIG_MAX_SIZE,
