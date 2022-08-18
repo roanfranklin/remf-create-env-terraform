@@ -1177,6 +1177,9 @@ def create_s3(OUTPUT_RESULTS, NAME, DATA):
     'error_document': BUCKET_S3_WEBSITE_ERROR
   }
 
+  TEMPLATE_IAM = open('{0}/s3-website/iam.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
+  if BUCKET_S3_WEBSITE == True:
+    TEMPLATE_IAM += open('{0}/s3-website/iam-bkp.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   TEMPLATE_S3 = open('{0}/s3-website/s3.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   if BUCKET_S3_WEBSITE == True:
     TEMPLATE_S3 += open('{0}/s3-website/s3-bkp.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
@@ -1192,7 +1195,10 @@ def create_s3(OUTPUT_RESULTS, NAME, DATA):
     output_service('Serviço {1} no diretório "{0}"'.format(DIR_S3, SERVICE.upper()))
     dirExist(DIR_S3)
 
-    FILE_S3='{0}/rds.tf'.format(DIR_S3)
+    FILE_IAM='{0}/iam.tf'.format(DIR_S3)
+    writefile('w', FILE_IAM, TEMPLATE_IAM)
+
+    FILE_S3='{0}/s3.tf'.format(DIR_S3)
     writefile('w', FILE_S3, TEMPLATE_S3)
 
     FILE_OUTPUT='{0}/output.tf'.format(DIR_S3)
