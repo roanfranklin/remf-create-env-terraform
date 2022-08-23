@@ -19,6 +19,7 @@ resource "aws_subnet" "project-eks-subnet" {{
   count = var.subnets_public_total
 
   availability_zone       = data.aws_availability_zones.available.names[count.index]
+  #cidr_block              = cidrsubnet("${{var.cidr_env}}", 8, "${{var.subnets_public_total + var.subnets_private_total + count.index}}")
   cidr_block              = cidrsubnet("${{var.cidr_env}}", 8, "${{var.subnets_public_total + var.subnets_private_total + count.index}}")
   map_public_ip_on_launch = true
   vpc_id                  = aws_vpc.project-eks-vpc.id

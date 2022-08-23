@@ -8,9 +8,7 @@ resource "aws_subnet" "subnet_private_az" {{
   map_public_ip_on_launch = false
   # ipv6_cidr_block = cidrsubnet(aws_vpc.vpc_env.ipv6_cidr_block, 8, 0)
   # assign_ipv6_address_on_creation = true
-  tags = {{
-    Name = "{project}-{env_lower}-subnet-pivate-az${{count.index}}"
-  }}
+  tags = {tags_subnet_private}
 }}
 
 
@@ -23,7 +21,5 @@ resource "aws_subnet" "subnet_public_az" {{
   map_public_ip_on_launch = true
   # ipv6_cidr_block = cidrsubnet(aws_vpc.vpc_env.ipv6_cidr_block, 8, 1)
   # assign_ipv6_address_on_creation = true
-  tags = {{
-    Name = "{project}-{env_lower}-subnet-public-az${{count.index}}"
-  }}
+  tags = {tags_subnet_public}
 }}

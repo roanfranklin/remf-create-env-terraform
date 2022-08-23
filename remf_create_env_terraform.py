@@ -13,6 +13,7 @@ import os
 import argparse
 import glob
 import yaml
+import json
 
 # ###################################################################################################
 # FUNÇÕES E PROCEDIMENTOS PADRÕES DO SISTEMA
@@ -110,6 +111,7 @@ def create_secrets_tfvars(DIR, FILE_YAML):
   REGION = config.get('region')
   ENV = config.get('environment')
   S3_STATE = config.get('s3_state')
+  SVC = config.get('services')
 
   results = {
     'project': PROJECT,
@@ -117,7 +119,8 @@ def create_secrets_tfvars(DIR, FILE_YAML):
     'region': REGION,
     'environment': ENV.lower(),
     's3_state': S3_STATE,
-    'dir_output_start': DIR
+    'dir_output_start': DIR,
+    'services': SVC
   }
 
   TEMPLATE_SECRETS_TFVARS = open('{0}/secrets/var_start.tfvars'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
@@ -236,6 +239,13 @@ def create_network(OUTPUT_RESULTS, NAME, DATA):
   SERVICE = DATA.get('service')
   POSITION = DATA.get('position')
   ACTIVE = DATA.get('active')
+  VPC_EKS_ACTIVE = False
+  OTHER_SERVICES = OUTPUT_RESULTS.get('services')
+  for SVC in OTHER_SERVICES:
+    if str(OTHER_SERVICES[SVC].get('service')).upper() == 'EKS':
+      VPC_EKS = OTHER_SERVICES[SVC].get('vpc')
+      VPC_EKS_ACTIVE = VPC_EKS.get('active')
+
   if SERVICE.upper() == NAME.upper():
     DIR_OUTPUT = '{0}/{1:02}-{2}-{0}'.format(ENV.upper(), POSITION, SERVICE.upper())
   else:
@@ -262,6 +272,7 @@ def create_network(OUTPUT_RESULTS, NAME, DATA):
     'name': NAME,
     'dir_output_network': '{0}/{1}'.format(DIR, DIR_OUTPUT),
     'position': POSITION,
+    'new_vpc_eks': VPC_EKS_ACTIVE,
     'cidr_env': CIDR,
     'cidr_2octectos': CIDR_2OCTETOS,
     'subnets_public_total': SUBNETS_PUBLIC,
@@ -270,6 +281,34 @@ def create_network(OUTPUT_RESULTS, NAME, DATA):
     'vpc_enable_dns_support': str(VPC_ENABLE_DNS_SUPPORT).lower(),
     'vpc_assign_generated_ipv6_cidr_block': str(VPC_ASSIGN_GENERATED_IPV6_CIDR_BLOCK).lower()
   }
+
+  if VPC_EKS_ACTIVE == False:
+    EKS_TAGS_VPC_JSON = '''{{
+    "Name" = "{project}-eks-vpc"
+    "kubernetes.io/cluster/{project}-eks-cluster" = "shared"
+  }}'''.format(**results)
+    EKS_TAGS_SUBNETS_PRIVATE_JSON = '''{{
+    "Name" = "{project}-{env_lower}-subnet-pivate-az${{count.index}}"
+    "kubernetes.io/cluster/{project}-eks-cluster" = "shared"
+  }}'''.format(**results)
+    EKS_TAGS_SUBNETS_PUBLIC_JSON = '''{{
+    "Name" =  "{project}-{env_lower}-subnet-public-az${{count.index}}"
+    "kubernetes.io/cluster/{project}-eks-cluster" = "shared"
+  }}'''.format(**results)
+  else:
+    EKS_TAGS_VPC_JSON = '''{{
+    "Name" = "{project}-vpc-{env_lower}"
+  }}'''.format(**results)
+    EKS_TAGS_SUBNETS_PRIVATE_JSON = '''{{
+    "Name" = "{project}-{env_lower}-subnet-pivate-az${{count.index}}"
+  }}'''.format(**results)
+    EKS_TAGS_SUBNETS_PUBLIC_JSON = '''{{
+    "Name" = "{project}-{env_lower}-subnet-public-az${{count.index}}"
+  }}'''.format(**results)
+
+  results['tags_vpc'] = EKS_TAGS_VPC_JSON
+  results['tags_subnet_private'] = EKS_TAGS_SUBNETS_PRIVATE_JSON
+  results['tags_subnet_public'] = EKS_TAGS_SUBNETS_PUBLIC_JSON
 
   TEMPLATE_EIP = open('{0}/network/eip.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
   TEMPLATE_IG = open('{0}/network/internetgateway.tf'.format(DIR_TEMPLATES_AWS), 'r').read().format(**results)
