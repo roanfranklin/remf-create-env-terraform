@@ -5,9 +5,9 @@ resource "aws_db_instance" "{engine}" {{
   engine_version            = var.rds_engine_version
   identifier                = var.rds_name
   instance_class            = var.rds_instance_class
-  name                      = var.rds_database_mysql
-  username                  = var.rds_username_mysql
-  password                  = var.rds_password_mysql
+  name                      = var.rds_database_{engine}
+  username                  = var.rds_username_{engine}
+  password                  = var.rds_password_{engine}
   parameter_group_name      = var.rds_parameter_group_name
   availability_zone         = "${{var.region}}${{var.rds_availability_zone}}"
   #final_snapshot_identifier = "{final_snapshot_identifier}"
